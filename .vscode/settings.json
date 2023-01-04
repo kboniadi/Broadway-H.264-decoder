@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "opttarget.h": "c",
+        "extraflags.h": "c",
+        "h264bsd_stream.h": "c",
+        "decoder.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "h264swdecapi.h": "c"
+    }
+}
