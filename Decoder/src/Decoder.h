@@ -44,6 +44,7 @@ extern void broadwayOnHeadersDecoded();
 extern void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height);
 
 u8 *broadwayCreateStream(Decoder *dec, u32 length);
+void broadwayPlayStream(Decoder *dec, u32 length);
 
 u32 broadwayInit(Decoder *dec);
 u32 broadwayDecode(Decoder *dec);
