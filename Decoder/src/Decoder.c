@@ -35,7 +35,6 @@ void broadwayPlayStream(Decoder *dec, u32 length) {
 
 
 u32 broadwayInit(Decoder *dec) {
-  
   H264SwDecRet ret;
 #ifdef DISABLE_OUTPUT_REORDERING
   u32 disableOutputReordering = 1;
@@ -43,6 +42,7 @@ u32 broadwayInit(Decoder *dec) {
   u32 disableOutputReordering = 0;
 #endif
 
+  dec->streamBuffer = NULL;
   /* Initialize decoder instance. */
   ret = H264SwDecInit(&dec->decInst, disableOutputReordering);
   if (ret != H264SWDEC_OK) {

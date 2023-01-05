@@ -4,7 +4,6 @@ import os, sys, re, json, shutil
 from subprocess import Popen, PIPE, STDOUT
 
 exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
-
 sys.path.append(EMSCRIPTEN_ROOT)
 import tools.shared as emscripten
 
@@ -50,7 +49,7 @@ OBJ_DIR = "obj"
 if not os.path.exists(OBJ_DIR):
   os.makedirs(OBJ_DIR)
 
-print 'build'
+print('build')
 
 source_files = [
   'h264bsd_transform.c',
@@ -84,18 +83,18 @@ source_files = [
 
 for file in source_files:
   target = file.replace('.c', '.o')
-  print 'emcc %s -> %s' % (file, target)
+  print('emcc %s -> %s' % (file, target))
   emscripten.Building.emcc(os.path.join('src', file), emcc_args + ['-Isrc', '-Iinc'], os.path.join('obj', target))
   
 object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files];
 
-print 'link -> %s' % 'avc.bc'
+print('link -> %s' % 'avc.bc')
 emscripten.Building.link(object_files, 'avc.bc')
 
-print 'emcc %s -> %s' % ('avc.bc', os.path.join(JS_DIR, 'avc.js'))
+print('emcc %s -> %s' % ('avc.bc', os.path.join(JS_DIR, 'avc.js')))
 emscripten.Building.emcc('avc.bc', emcc_args, os.path.join(JS_DIR, 'avc.js'))
 
-print 'copying %s -> %s' % (os.path.join(JS_DIR, 'avc.js'), os.path.join('..','Player','avc-codec.js'))
+print('copying %s -> %s' % (os.path.join(JS_DIR, 'avc.js'), os.path.join('..','Player','avc-codec.js')))
 
 
 f = open(os.path.join('..','Player','Decoder.js'), "w")

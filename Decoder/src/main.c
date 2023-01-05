@@ -12,5 +12,6 @@ int main() {
     broadwayInit(&dec);
     u8* stream = broadwayCreateStream(&dec, 1024 * 1024);
 
+    
     broadwayExit(&dec);
 }

@@ -24,7 +24,7 @@ typedef struct {
 } Stream;
 
 typedef struct {
-    u8 *streamBuffer = NULL;
+    u8 *streamBuffer;
 
     H264SwDecInst decInst;
     H264SwDecInput decInput;
