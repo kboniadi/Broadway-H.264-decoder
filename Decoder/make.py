@@ -3,7 +3,7 @@
 import os, sys, re, json, shutil
 from subprocess import Popen, PIPE, STDOUT
 
-exec(open(os.path.expanduser('~/.emscripten'), 'r').read())
+exec(open(os.path.expanduser('~/Documents/source.nosync/emsdk/.emscripten'), 'r').read())
 sys.path.append(EMSCRIPTEN_ROOT)
 import tools.shared as emscripten
 
