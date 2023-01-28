@@ -1,11 +1,18 @@
 #!/usr/bin/python
 
 import os, sys, re, json, shutil
+import subprocess
 from subprocess import Popen, PIPE, STDOUT
 
-exec(open(os.path.expanduser('~/Documents/source.nosync/emsdk/.emscripten'), 'r').read())
+subprocess.run('source /Users/kord/Documents/source.nosync/emsdk/emsdk_env.sh', shell=True)
+os.environ['EM_CONFIG'] = '/Users/kord/Documents/source.nosync/emsdk/.emscripten'
+
+s = open(os.path.expanduser('/Users/kord/Documents/source.nosync/emsdk/.emscripten'), 'r').read()
+exec(s)
+
 sys.path.append(EMSCRIPTEN_ROOT)
-import tools.shared as emscripten
+# import tools.shared as emscripten
+
 
 emcc_args = [
   #'-m32',
@@ -16,7 +23,7 @@ emcc_args = [
   '--llvm-lto', '3',
   '-s', 'NO_EXIT_RUNTIME=1',
   '-s', 'NO_FILESYSTEM=1',
-  '-s', 'NO_BROWSER=1',
+  # '-s', 'NO_BROWSER=1',
   
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
@@ -28,7 +35,7 @@ emcc_args = [
   #'-s', 'INLINING_LIMIT=50',
   #'-s', 'OUTLINING_LIMIT=100',
   '-s', 'DOUBLE_MODE=0',
-  '-s', 'PRECISE_I64_MATH=0',
+  # '-s', 'PRECISE_I64_MATH=0',
   #'-s', 'SIMD=1',
   '-s', 'AGGRESSIVE_VARIABLE_ELIMINATION=1',
   '-s', 'ALIASING_FUNCTION_POINTERS=1',
@@ -81,33 +88,38 @@ source_files = [
   'extraFlags.c',
   'Decoder.c']
 
+
 for file in source_files:
   target = file.replace('.c', '.o')
   print('emcc %s -> %s' % (file, target))
-  emscripten.Building.emcc(os.path.join('src', file), emcc_args + ['-Isrc', '-Iinc'], os.path.join('obj', target))
+  subprocess.run(['emcc'] + emcc_args + ['-Isrc', '-Iinc'] + ['-c', os.path.join('src', file), '-o', os.path.join('obj', target)])
+  # emscripten.Building.emcc(os.path.join('src', file), emcc_args + ['-Isrc', '-Iinc'], os.path.join('obj', target))
   
-object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files];
+object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files]
 
 print('link -> %s' % 'avc.bc')
-emscripten.Building.link(object_files, 'avc.bc')
+subprocess.run(['emcc', '-r'] + object_files + ['-o', 'avc.bc'])
+# subprocess.run(['emar', 'rcs', 'avc.bc'] + object_files)
+# emscripten.Building.link(object_files, 'avc.bc')
 
 print('emcc %s -> %s' % ('avc.bc', os.path.join(JS_DIR, 'avc.js')))
-emscripten.Building.emcc('avc.bc', emcc_args, os.path.join(JS_DIR, 'avc.js'))
+subprocess.run(['emcc', 'avc.bc', '-o', os.path.join(JS_DIR, 'avc.js')] + emcc_args)
+# emscripten.Building.emcc('avc.bc', emcc_args, os.path.join(JS_DIR, 'avc.js'))
 
 print('copying %s -> %s' % (os.path.join(JS_DIR, 'avc.js'), os.path.join('..','Player','avc-codec.js')))
 
 
 f = open(os.path.join('..','Player','Decoder.js'), "w")
-f1 = open(os.path.join("..", "templates", 'DecoderPre.js'));
-f.write(f1.read());
-f2 = open(os.path.join(JS_DIR, 'avc.js'));
-jscont = f2.read();
-jscont = jscont.replace('require(', '(null)(');
-jscont = jscont.replace('typeof require', 'typeof null');
-f.write(jscont);
-f3 = open(os.path.join("..", "templates", 'DecoderPost.js'));
-f.write(f3.read());
+f1 = open(os.path.join("..", "templates", 'DecoderPre.js'))
+f.write(f1.read())
+f2 = open(os.path.join(JS_DIR, 'avc.js'))
+jscont = f2.read()
+jscont = jscont.replace('require(', '(null)(')
+jscont = jscont.replace('typeof require', 'typeof null')
+f.write(jscont)
+f3 = open(os.path.join("..", "templates", 'DecoderPost.js'))
+f.write(f3.read())
 
-asmfile = open(os.path.join('..','Player','avc.wasm'), "w")
-amsfilein = open(os.path.join(JS_DIR, 'avc.wasm'));
-asmfile.write(amsfilein.read());
+asmfile = open(os.path.join('..','Player','avc.wasm'), "wb")
+amsfilein = open(os.path.join(JS_DIR, 'avc.wasm'), 'rb')
+asmfile.write(amsfilein.read())
