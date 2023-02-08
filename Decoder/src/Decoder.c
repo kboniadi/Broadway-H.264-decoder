@@ -13,7 +13,7 @@ void playStream(Decoder *dec, Stream *stream) {
     do {
         u8 *start = dec->decInput.pStream;
         u32 ret = broadwayDecode(dec);
-        // printf("Decoded Unit #%d, Size: %d, Result: %d\n", i++, (decInput.pStream - start), ret);
+        printf("Decoded Unit #%d, Size: %d, Result: %d\n", i++, (dec->decInput.pStream - start), ret);
     } while (dec->decInput.dataLen > 0);
 }
 
@@ -60,7 +60,6 @@ u32 broadwayDecode(Decoder *dec) {
     dec->decInput.picId = dec->picDecodeNumber;
 
     H264SwDecRet ret = H264SwDecDecode(dec->decInst, &dec->decInput, &dec->decOutput);
-
     switch (ret) {
         case H264SWDEC_HDRS_RDY_BUFF_NOT_EMPTY:
             /* Stream headers were successfully decoded, thus stream information is available for query now. */
@@ -101,7 +100,6 @@ u32 broadwayDecode(Decoder *dec) {
 
                 /* Increment display number for every displayed picture */
                 dec->picDisplayNumber++;
-
 #ifndef EMIT_IMAGE_ASAP
                 broadwayOnPictureDecoded((u8*)dec->decPicture.pOutputPicture, dec->decInfo.picWidth, dec->decInfo.picHeight);
 #endif

@@ -14,7 +14,7 @@
 
 #include "extraFlags.h"
 
-const size_t STREAM_BUFFER_SIZE = 1024 * 1024;
+#define STREAM_BUFFER_SIZE = 1024 * 1024;
 
 typedef struct {
     u32 length;
@@ -48,6 +48,7 @@ void broadwayPlayStream(Decoder *dec, u32 length);
 
 u32 broadwayInit(Decoder *dec);
 u32 broadwayDecode(Decoder *dec);
+void playStream(Decoder *dec, Stream *stream);
 void broadwayExit(Decoder *dec);
 
 #endif // DECODER_H_
