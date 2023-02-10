@@ -35,6 +35,7 @@
 /*------------------------------------------------------------------------------
     1. Include headers
 ------------------------------------------------------------------------------*/
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "basetype.h"
@@ -351,12 +352,15 @@ H264SwDecRet H264SwDecDecode(H264SwDecInst decInst, H264SwDecInput *pInput,
     /* Check that function input parameters are valid */
     if (pInput == NULL || pOutput == NULL)
     {
+        printf("pInput or pOutput is NULL\n");
         DEC_API_TRC("H264SwDecDecode# ERROR: pInput or pOutput is NULL");
         return(H264SWDEC_PARAM_ERR);
     }
 
     if ((pInput->pStream == NULL) || (pInput->dataLen == 0))
     {
+        printf("Invalid input parameters\n");
+
         DEC_API_TRC("H264SwDecDecode# ERROR: Invalid input parameters");
         return(H264SWDEC_PARAM_ERR);
     }
@@ -366,6 +370,8 @@ H264SwDecRet H264SwDecDecode(H264SwDecInst decInst, H264SwDecInput *pInput,
     /* Check if decoder is in an incorrect mode */
     if (decInst == NULL || pDecCont->decStat == UNINITIALIZED)
     {
+        printf("Decoder not initialized\n");
+
         DEC_API_TRC("H264SwDecDecode# ERROR: Decoder not initialized");
         return(H264SWDEC_NOT_INITIALIZED);
     }

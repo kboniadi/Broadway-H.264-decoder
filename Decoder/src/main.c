@@ -9,6 +9,13 @@ void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height) {
     printf("here");
 }
 
+struct Nal {
+    int offset;
+    int end;
+    int type;
+};
+
+
 int main(int argc, char *argv[]) {
     printf("hello, world!\n");
     Decoder dec;
@@ -35,25 +42,83 @@ int main(int argc, char *argv[]) {
 
 
     u8* stream = broadwayCreateStream(&dec, CHUNK_SIZE);
+    u8* nal_unit = (u8 *)malloc(sizeof(u8) * CHUNK_SIZE);
     memset(stream, 0, CHUNK_SIZE);
+    memset(nal_unit, 0, CHUNK_SIZE);
 
     int bytesRead = 0;
-    while ((bytesRead = fread(stream, sizeof(unsigned char), CHUNK_SIZE, input_file)) > 0) {
+    printf("here\n");
+    while ((bytesRead = fread(nal_unit, sizeof(unsigned char), CHUNK_SIZE, input_file)) > 0) {
         // Extract NAL units from the buffer and pass each one to the playStream function
+        struct Nal nals[100];
+        int idx = 0;
         int i = 0;
+        int startPos = 0;
+        int found = 0;
+        int lastFound = 0;
+        int lastStart = 0;
         while (i < bytesRead) {
-            int nal_size = 0;
-            for (int j = i; j < bytesRead - 4; j++) {
-                if (stream[j] == 0 && stream[j + 1] == 0 && stream[j + 2] == 0 && stream[j + 3] == 1) {
-                    nal_size = j - i;
-                    break;
+            if (nal_unit[i] == 1) {
+                if (nal_unit[i - 1] == 0 && nal_unit[i - 2] == 0) {
+                    startPos = i - 2;
+                    if (nal_unit[i - 3] == 0) {
+                        startPos = i - 3;
+                    }
+
+                    if (found) {
+                        nals[idx].offset = lastFound;
+                        nals[idx].end = startPos;
+                        nals[idx].type = nal_unit[lastStart] & 31;
+                        idx++;
+
+                    }
+                    lastFound = startPos;
+                    lastStart = startPos + 3;
+                    if (nal_unit[i - 3] == 0) {
+                        lastStart = startPos + 4;
+                    }
+                    found = 1;
                 }
             }
-            printf("%d\n", nal_size);
-            sleep(1);
-            broadwayPlayStream(&dec, nal_size);
-            i += nal_size + 4;
+            i++;
         }
+        if (found) {
+            nals[idx].offset = lastFound;
+            nals[idx].end = i;
+            nals[idx].type = nal_unit[lastStart] & 31;
+            idx++;
+        }
+
+        int currentSlice = 0;
+        int offset = 0;
+        u8* subarr;
+        for (int i = 0; i < idx; i++) {
+            if (nals[i].type == 1 || nals[i].type == 5) {
+                if (currentSlice == idx) {
+                    int length = nals[i].end - nals[i].offset + 1;
+                    // u8* subarr = &nal_unit[nals[i].offset];
+                    // int length = nals[i].end - nals[i].offset + 1;
+                    memccpy(subarr, nal_unit, nals[i].offset, length);
+                    stream[offset] = 0;
+                    offset++;
+                    memccpy(stream + offset, subarr, 0, length);
+                    offset += length;
+                }
+                currentSlice++;
+            } else {
+                int length = nals[i].end - nals[i].offset + 1;
+                // u8* subarr = &nal_unit[nals[i].offset];
+                // int length = nals[i].end - nals[i].offset + 1;
+                memccpy(subarr, nal_unit, nals[i].offset, length);
+                stream[offset] = 0;
+                offset++;
+                memccpy(stream + offset, subarr, 0, length);
+                offset += length;
+                broadwayPlayStream(&dec, offset);
+                offset = 0;
+            }
+        }
+        broadwayPlayStream(&dec, offset);
     }
 
     fclose(input_file);
