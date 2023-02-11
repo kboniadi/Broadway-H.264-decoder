@@ -44,7 +44,7 @@ emcc_args = [
   # '-s', '''EXPORTED_FUNCTIONS=["HEAP8", "HEAP16", "HEAP32", "_broadwayGetMajorVersion", "_broadwayGetMinorVersion", "_broadwayInit", "_broadwayExit", "_broadwayCreateStream", "_broadwayPlayStream", "_broadwayOnHeadersDecoded", "_broadwayOnPictureDecoded"]''',
   #'--closure', '1',
   '--js-library', 'library.js',
-  '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/testFile.h264@testFile.h264',
+  '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/fox.mp4@fox.mp4',
   # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/js/avc.data@avc.data',
 ]
   
