@@ -370,6 +370,13 @@ H264SwDecRet H264SwDecDecode(H264SwDecInst decInst, H264SwDecInput *pInput,
     /* Check if decoder is in an incorrect mode */
     if (decInst == NULL || pDecCont->decStat == UNINITIALIZED)
     {
+        if (decInst == NULL) {
+            printf("it was null\n");
+        }
+
+        if (pDecCont->decStat == UNINITIALIZED) {
+            printf("it was uninit\n");
+        }
         printf("Decoder not initialized\n");
 
         DEC_API_TRC("H264SwDecDecode# ERROR: Decoder not initialized");

@@ -7,7 +7,7 @@
 #define CHUNK_SIZE 1024 * 1024
 
 void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height) {
-    printf("here");
+    printf("am I getting called");
 }
 
 struct Nal {
@@ -19,6 +19,7 @@ struct Nal {
 
 int main(int argc, char *argv[]) {
     printf("hello, world!\n");
+    printf("hello, world!\n");
     Decoder dec;
     int input_buffer_size;
 
@@ -29,7 +30,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    FILE *input_file = fopen("fox.mp4", "rb");
+    FILE *input_file = fopen("mozilla_story.mp4", "rb");
     if (!input_file) {
         fprintf(stderr, "Failed to open input file\n");
         return -1;
@@ -42,16 +43,49 @@ int main(int argc, char *argv[]) {
     printf("file size: %d\n", input_buffer_size);
 
 
-    u8* stream = broadwayCreateStream(&dec, CHUNK_SIZE);
-    u8* buffer = (u8 *)malloc(sizeof(u8) * CHUNK_SIZE);
-    memset(stream, 0, CHUNK_SIZE);
-    memset(buffer, 0, CHUNK_SIZE);
+    u8* stream = broadwayCreateStream(&dec, input_buffer_size);
+    u8* buffer = (u8 *)malloc(sizeof(u8) * input_buffer_size);
+
+    // int length = fread(buffer, sizeof(u8), input_buffer_size, input_file);
+    // int pos = 0;
+    // int start = 0;
+    // int end = length;
+
+    // int count = buffer[pos++] & 31;
+    // printf("%d\n", count);
+    // u8* sps = (u8 *)malloc(sizeof(u8) * input_buffer_size);
+    // int lenSps = 0;
+    // for (int i = 0; i < count; i++) {
+    //     lenSps = buffer[pos + 0] << 8 | buffer[pos + 1];
+    //     pos += 2;
+    //     printf("%d\n", lenSps);
+
+    //     memcpy(sps, buffer + pos, pos + lenSps);
+    //     pos += lenSps;
+    // }
+
+    // count = buffer[pos++] & 31;
+    // printf("%d\n", count);
+    // u8* pps = (u8 *)malloc(sizeof(u8) * input_buffer_size);
+    // int lenPps = 0;
+    // for (int i = 0; i < count; i++) {
+    //     lenPps = buffer[pos + 0] << 8 | buffer[pos + 1];
+    //     pos += 2;
+    //     printf("%d\n", lenPps);
+
+    //     memcpy(pps, buffer + pos, pos + lenPps);
+    //     pos += lenPps;
+    // }
+
+    // memcpy(stream, sps, lenSps);
+    // broadwayPlayStream(&dec, lenSps);
+    // memcpy(stream, pps, lenPps);
+    // broadwayPlayStream(&dec, lenPps);
 
     int bytesRead = 0;
-    printf("here\n");
-    while ((bytesRead = fread(buffer, sizeof(unsigned char), CHUNK_SIZE, input_file)) > 0) {
-        // Extract NAL units from the buffer and pass each one to the playStream function
-        struct Nal nals[100];
+    while ((bytesRead = fread(buffer, sizeof(u8), input_buffer_size, input_file)) > 0) {
+        printf("%d\n", bytesRead);
+        struct Nal nals[1000];
         int idx = 0;
         int i = 0;
         int startPos = 0;
@@ -70,6 +104,7 @@ int main(int argc, char *argv[]) {
                         nals[idx].offset = lastFound;
                         nals[idx].end = startPos;
                         nals[idx].type = buffer[lastStart] & 31;
+                        // printf("%d %d %d\n", nals[idx].offset, nals[idx].end, nals[idx].type);
                         idx++;
                     }
                     lastFound = startPos;
@@ -86,39 +121,32 @@ int main(int argc, char *argv[]) {
             nals[idx].offset = lastFound;
             nals[idx].end = i;
             nals[idx].type = buffer[lastStart] & 31;
+            // printf("%d %d %d\n", nals[idx].offset, nals[idx].end, nals[idx].type);
             idx++;
         }
 
+        printf("-------------------------\n");
+        for (int i = 0; i < 3; i++) {
+            printf("arr[%d].x = %d, arr[%d].y = %d, arr[%d].z = %d\n", i, nals[i].offset, i, nals[i].end, i, nals[i].type);
+        }
         int currentSlice = 0;
         int offset = 0;
-        u8* subarr = (u8 *)malloc(sizeof(u8) * CHUNK_SIZE);
+
         for (int i = 0; i < idx; i++) {
-            if (nals[i].type == 1 || nals[i].type == 5) {
-                if (currentSlice == idx) {
-                    int length = nals[i].end - nals[i].offset + 1;
-                    // u8* subarr = &nal_unit[nals[i].offset];
-                    // int length = nals[i].end - nals[i].offset + 1;
-                    memcpy(subarr, buffer + nals[i].offset, length);
-                    stream[offset] = 0;
-                    offset++;
-                    memcpy(stream + offset, subarr, length);
-                    offset += length;
-                }
-                currentSlice++;
-            } else {
-                int length = nals[i].end - nals[i].offset + 1;
-                // u8* subarr = &nal_unit[nals[i].offset];
-                // int length = nals[i].end - nals[i].offset + 1;
-                memcpy(subarr, buffer + nals[i].offset, length);
-                stream[offset] = 0;
-                offset++;
-                memcpy(stream + offset, subarr, length);
-                offset += length;
-                broadwayPlayStream(&dec, offset);
-                offset = 0;
+            int length = nals[i].end - nals[i].offset;
+
+            stream[offset] = 0;
+            offset++;
+            memcpy(stream + offset, buffer + nals[i].offset, length);
+            offset += length;
+            for (int j = 0; j < offset; j++) {
+                printf("%d\n", stream[j]);
             }
+            broadwayPlayStream(&dec, offset);
+            offset = 0;
         }
-        broadwayPlayStream(&dec, offset);
+        // printf("%d\n", offset);
+        // broadwayPlayStream(&dec, offset);
     }
 
     fclose(input_file);

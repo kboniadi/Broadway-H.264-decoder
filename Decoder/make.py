@@ -4,7 +4,7 @@ import os, sys, re, json, shutil
 import subprocess
 from subprocess import Popen, PIPE, STDOUT
 
-subprocess.run('source /Users/kord/Documents/source.nosync/emsdk/emsdk_env.sh', shell=True)
+# subprocess.run('source /Users/kord/Documents/source.nosync/emsdk/emsdk_env.sh', shell=True)
 os.environ['EM_CONFIG'] = '/Users/kord/Documents/source.nosync/emsdk/.emscripten'
 
 s = open(os.path.expanduser('/Users/kord/Documents/source.nosync/emsdk/.emscripten'), 'r').read()
@@ -12,10 +12,11 @@ exec(s)
 
 sys.path.append(EMSCRIPTEN_ROOT)
 
-
+REMOTE_PACKAGE_BASE = "js/avc.data"
 emcc_args = [
   #'-m32',
   '-O3',
+  "-DREMOTE_PACKAGE_BASE={}".format(REMOTE_PACKAGE_BASE),
   #'-Dxxx2yyy'
   '--memory-init-file', '1',
   '--llvm-opts', '3',
@@ -23,7 +24,6 @@ emcc_args = [
   '-s', 'NO_EXIT_RUNTIME=1',
   # '-s', 'NO_FILESYSTEM=1',
   # '-s', 'NO_BROWSER=1',
-  
   #'-s', 'CORRECT_SIGNS=1',
   #'-s', 'CORRECT_OVERFLOWS=1',
   '-s', 'TOTAL_MEMORY=' + str(50*1024*1024),
@@ -44,12 +44,14 @@ emcc_args = [
   # '-s', '''EXPORTED_FUNCTIONS=["HEAP8", "HEAP16", "HEAP32", "_broadwayGetMajorVersion", "_broadwayGetMinorVersion", "_broadwayInit", "_broadwayExit", "_broadwayCreateStream", "_broadwayPlayStream", "_broadwayOnHeadersDecoded", "_broadwayOnPictureDecoded"]''',
   #'--closure', '1',
   '--js-library', 'library.js',
-  '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/fox.mp4@fox.mp4',
-  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/js/avc.data@avc.data',
+  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/testFile.h264@testFile.h264',
+  '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/mozilla_story.mp4@mozilla_story.mp4',
+  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/fox.264@fox.264',
+  # '--pre-js', 'file_dir.js',
+  # '--post-js', 'file_dir.js'
 ]
-  
-JS_DIR = "js"
 
+JS_DIR = "js"
 if not os.path.exists(JS_DIR):
   os.makedirs(JS_DIR)
   
@@ -95,25 +97,27 @@ for file in source_files:
   target = file.replace('.c', '.o')
   print('emcc %s -> %s' % (file, target))
   subprocess.run(['emcc'] + emcc_args + ['-Isrc', '-Iinc'] + ['-c', os.path.join('src', file), '-o', os.path.join('obj', target)])
-  # emscripten.Building.emcc(os.path.join('src', file), emcc_args + ['-Isrc', '-Iinc'], os.path.join('obj', target))
   
 object_files = [os.path.join('obj', x.replace('.c', '.o')) for x in source_files]
 
 print('link -> %s' % 'avc.bc')
 subprocess.run(['emcc', '-r'] + object_files + ['-o', 'avc.bc'])
-# subprocess.run(['emar', 'rcs', 'avc.bc'] + object_files)
-# emscripten.Building.link(object_files, 'avc.bc')
 
-print('emcc %s -> %s' % ('avc.bc', os.path.join(JS_DIR, 'avc.js')))
-subprocess.run(['emcc', 'avc.bc', '-o', os.path.join(JS_DIR, 'avc.js')] + emcc_args)
-# emscripten.Building.emcc('avc.bc', emcc_args, os.path.join(JS_DIR, 'avc.js'))
+# print('emcc %s -> %s' % ('avc.bc', os.path.join(JS_DIR, 'avc.js')))
+# subprocess.run(['emcc', 'avc.bc', '-o', os.path.join(JS_DIR, 'avc.js')] + emcc_args)
 
-print('copying %s -> %s' % (os.path.join(JS_DIR, 'avc.js'), os.path.join('..','Player','avc-codec.js')))
+# print('copying %s -> %s' % (os.path.join(JS_DIR, 'avc.js'), os.path.join('..','Player','avc-codec.js')))
+
+print('emcc %s -> %s' % ('avc.bc', 'avc.js'))
+subprocess.run(['emcc', 'avc.bc', '-o', 'avc.js'] + emcc_args)
+
+print('copying %s -> %s' % ('avc.js', os.path.join('..','Player','avc-codec.js')))
 
 f = open(os.path.join('..','Player','Decoder.js'), "w")
 f1 = open(os.path.join("..", "templates", 'DecoderPre.js'))
 f.write(f1.read())
-f2 = open(os.path.join(JS_DIR, 'avc.js'))
+f2 = open('avc.js')
+# f2 = open(os.path.join(JS_DIR, 'avc.js'))
 jscont = f2.read()
 jscont = jscont.replace('require(', '(null)(')
 jscont = jscont.replace('typeof require', 'typeof null')
@@ -121,5 +125,6 @@ f.write(jscont)
 f3 = open(os.path.join("..", "templates", 'DecoderPost.js'))
 f.write(f3.read())
 asmfile = open(os.path.join('..','Player','avc.wasm'), "wb")
-amsfilein = open(os.path.join(JS_DIR, 'avc.wasm'), 'rb')
+amsfilein = open('avc.wasm', 'rb')
+# amsfilein = open(os.path.join(JS_DIR, 'avc.wasm'), 'rb')
 asmfile.write(amsfilein.read())
