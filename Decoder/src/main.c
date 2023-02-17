@@ -7,6 +7,12 @@
 
 // #define CHUNK_SIZE 1024 * 1024
 
+//! convert to baseline profile
+//* ffmpeg -i h264.h264 -profile:v baseline output.h264
+
+//! play raw YUV
+//* ffplay -f rawvideo -pixel_format yuv420p -video_size 640x480 decode.yuv
+
 void writeToFile(uint8_t* data, size_t size, const char* filename) {
     FILE *outfile = fopen(filename, "ab");
     if (outfile == NULL) {
@@ -38,155 +44,12 @@ void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height) {
     writeToFile(buffer, (width * height * 3) / 2, "decode.yuv");
 }
 
-// struct Nal {
-//     int offset;
-//     int end;
-//     int type;
-// };
+struct Nal {
+    int offset;
+    int end;
+    int type;
+};
 
-
-// int main(int argc, char *argv[]) {
-//     printf("hello, world!\n");
-//     printf("hello, world!\n");
-    
-//     Decoder dec;
-//     int input_buffer_size;
-
-
-//     int ret = broadwayInit(&dec);
-//     if (ret != H264SWDEC_OK) {
-//         fprintf(stderr, "Failed to initialize Broadway\n");
-//         return -1;
-//     }
-
-//     FILE *input_file = fopen("fox.264", "rb");
-//     if (!input_file) {
-//         fprintf(stderr, "Failed to open input file\n");
-//         return -1;
-//     }
-
-//     fseek(input_file, 0, SEEK_END);
-//     input_buffer_size = ftell(input_file);
-//     fseek(input_file, 0, SEEK_SET);
-
-//     printf("file size: %d\n", input_buffer_size);
-
-
-//     u8* stream = broadwayCreateStream(&dec, input_buffer_size);
-//     u8* buffer = (u8 *)malloc(sizeof(u8) * input_buffer_size);
-
-//     // int length = fread(buffer, sizeof(u8), input_buffer_size, input_file);
-//     // int pos = 0;
-//     // int start = 0;
-//     // int end = length;
-
-//     // int count = buffer[pos++] & 31;
-//     // printf("%d\n", count);
-//     // u8* sps = (u8 *)malloc(sizeof(u8) * input_buffer_size);
-//     // int lenSps = 0;
-//     // for (int i = 0; i < count; i++) {
-//     //     lenSps = buffer[pos + 0] << 8 | buffer[pos + 1];
-//     //     pos += 2;
-//     //     printf("%d\n", lenSps);
-
-//     //     memcpy(sps, buffer + pos, pos + lenSps);
-//     //     pos += lenSps;
-//     // }
-
-//     // count = buffer[pos++] & 31;
-//     // printf("%d\n", count);
-//     // u8* pps = (u8 *)malloc(sizeof(u8) * input_buffer_size);
-//     // int lenPps = 0;
-//     // for (int i = 0; i < count; i++) {
-//     //     lenPps = buffer[pos + 0] << 8 | buffer[pos + 1];
-//     //     pos += 2;
-//     //     printf("%d\n", lenPps);
-
-//     //     memcpy(pps, buffer + pos, pos + lenPps);
-//     //     pos += lenPps;
-//     // }
-
-//     // memcpy(stream, sps, lenSps);
-//     // broadwayPlayStream(&dec, lenSps);
-//     // memcpy(stream, pps, lenPps);
-//     // broadwayPlayStream(&dec, lenPps);
-
-//     int bytesRead = 0;
-//     while ((bytesRead = fread(buffer, sizeof(u8), input_buffer_size, input_file)) > 0) {
-//         printf("%d\n", bytesRead);
-//         struct Nal nals[1000];
-//         int idx = 0;
-//         int i = 0;
-//         int startPos = 0;
-//         int found = 0;
-//         int lastFound = 0;
-//         int lastStart = 0;
-//         while (i < bytesRead) {
-//             if (buffer[i] == 1) {
-//                 if (buffer[i - 1] == 0 && buffer[i - 2] == 0) {
-//                     startPos = i - 2;
-//                     if (buffer[i - 3] == 0) {
-//                         startPos = i - 3;
-//                     }
-
-//                     if (found) {
-//                         nals[idx].offset = lastFound;
-//                         nals[idx].end = startPos;
-//                         nals[idx].type = buffer[lastStart] & 31;
-//                         // printf("%d %d %d\n", nals[idx].offset, nals[idx].end, nals[idx].type);
-//                         idx++;
-//                     }
-//                     lastFound = startPos;
-//                     lastStart = startPos + 3;
-//                     if (buffer[i - 3] == 0) {
-//                         lastStart = startPos + 4;
-//                     }
-//                     found = 1;
-//                 }
-//             }
-//             i++;
-//         }
-//         if (found) {
-//             nals[idx].offset = lastFound;
-//             nals[idx].end = i;
-//             nals[idx].type = buffer[lastStart] & 31;
-//             // printf("%d %d %d\n", nals[idx].offset, nals[idx].end, nals[idx].type);
-//             idx++;
-//         }
-
-//         printf("-------------------------\n");
-//         for (int i = 0; i < 3; i++) {
-//             printf("arr[%d].x = %d, arr[%d].y = %d, arr[%d].z = %d\n", i, nals[i].offset, i, nals[i].end, i, nals[i].type);
-//         }
-//         int currentSlice = 0;
-//         int offset = 0;
-
-//         for (int i = 0; i < idx; i++) {
-//             printf("%d\n", nals[i].offset);
-//             int length = nals[i].end - nals[i].offset;
-
-//             stream[offset] = 0;
-//             offset++;
-//             memcpy(stream + offset, buffer + nals[i].offset, length);
-//             offset += length;
-//             // for (int j = 0; j < offset; j++) {
-//             //     printf("%d\n", stream[j]);
-//             // }
-//             if (nals[i].offset >= 5000) {
-//                 broadwayPlayStream(&dec, offset);
-//             }
-//             offset = 0;
-//         }
-//         // printf("%d\n", offset);
-//         // broadwayPlayStream(&dec, offset);
-//     }
-
-//     fclose(input_file);
-//     broadwayExit(&dec);
-//     printf("done\n");
-
-//     return 0;
-// }
 
 /*------------------------------------------------------------------------------
     Module defines
@@ -358,33 +221,33 @@ int main(int argc, char *argv[]) {
 //     }
 
     /* read command line arguments */
-    for (i = 1; i < (u32)(argc-1); i++)
-    {
-        if ( strncmp(argv[i], "-N", 2) == 0 )
-        {
-            maxNumPics = (u32)atoi(argv[i]+2);
-        }
-        else if ( strncmp(argv[i], "-O", 2) == 0 )
-        {
-            strcpy(outFileName, argv[i]+2);
-        }
-        else if ( strcmp(argv[i], "-P") == 0 )
-        {
-            packetize = 1;
-        }
-        else if ( strcmp(argv[i], "-U") == 0 )
-        {
-            nalUnitStream = 1;
-        }
-        else if ( strcmp(argv[i], "-C") == 0 )
-        {
-            cropDisplay = 1;
-        }
-        else if ( strcmp(argv[i], "-R") == 0 )
-        {
-            disableOutputReordering = 1;
-        }
-    }
+    // for (i = 1; i < (u32)(argc-1); i++)
+    // {
+    //     if ( strncmp(argv[i], "-N", 2) == 0 )
+    //     {
+    //         maxNumPics = (u32)atoi(argv[i]+2);
+    //     }
+    //     else if ( strncmp(argv[i], "-O", 2) == 0 )
+    //     {
+    //         strcpy(outFileName, argv[i]+2);
+    //     }
+    //     else if ( strcmp(argv[i], "-P") == 0 )
+    //     {
+    //         packetize = 1;
+    //     }
+    //     else if ( strcmp(argv[i], "-U") == 0 )
+    //     {
+    //         nalUnitStream = 1;
+    //     }
+    //     else if ( strcmp(argv[i], "-C") == 0 )
+    //     {
+    //         cropDisplay = 1;
+    //     }
+    //     else if ( strcmp(argv[i], "-R") == 0 )
+    //     {
+    //         disableOutputReordering = 1;
+    //     }
+    // }
     nalUnitStream = 1;
     // packetize = 1;
     /* open input file for reading, file name given by user. If file open
