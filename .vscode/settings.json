@@ -20,6 +20,7 @@
         "vector": "c",
         "__locale": "c",
         "__string": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "sdl.h": "c"
     }
 }

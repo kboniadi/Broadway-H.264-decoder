@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 int SDL_main(int argc, char **argv) {
 #endif
 
-
+    printf("testtest");
 
     FILE *finput;
 

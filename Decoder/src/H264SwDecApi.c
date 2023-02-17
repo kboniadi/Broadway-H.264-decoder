@@ -422,7 +422,7 @@ H264SwDecRet H264SwDecDecode(H264SwDecInst decInst, H264SwDecInput *pInput,
             strmLen = 0;
 
         pOutput->pStrmCurrPos = tmpStream;
-
+        // printf("%d\n", decResult);
         switch (decResult)
         {
             case H264BSD_HDRS_RDY:
@@ -472,7 +472,6 @@ H264SwDecRet H264SwDecDecode(H264SwDecInst decInst, H264SwDecInput *pInput,
             default:
                 break;
         }
-
     } while (strmLen);
 
 #ifdef H264DEC_TRACE

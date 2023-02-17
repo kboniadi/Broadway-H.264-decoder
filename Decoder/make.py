@@ -12,11 +12,13 @@ exec(s)
 
 sys.path.append(EMSCRIPTEN_ROOT)
 
-REMOTE_PACKAGE_BASE = "js/avc.data"
 emcc_args = [
   #'-m32',
   '-O3',
-  "-DREMOTE_PACKAGE_BASE={}".format(REMOTE_PACKAGE_BASE),
+  '-D_ERROR_PRINT',
+  '-DBROADWAY_DEBUG',
+  # '-DDEBUG',
+  # '-DTRACE',
   #'-Dxxx2yyy'
   '--memory-init-file', '1',
   '--llvm-opts', '3',
@@ -41,14 +43,19 @@ emcc_args = [
   '-s', 'DISABLE_EXCEPTION_CATCHING=1',
   #'-s', 'USE_CLOSURE_COMPILER=1',
   #'-s', 'FORCE_ALIGNED_MEMORY=1', #why doesnt this work?
-  # '-s', '''EXPORTED_FUNCTIONS=["HEAP8", "HEAP16", "HEAP32", "_broadwayGetMajorVersion", "_broadwayGetMinorVersion", "_broadwayInit", "_broadwayExit", "_broadwayCreateStream", "_broadwayPlayStream", "_broadwayOnHeadersDecoded", "_broadwayOnPictureDecoded"]''',
+  # '-s', '''EXPORTED_FUNCTIONS=["_broadwayGetMajorVersion", "_broadwayGetMinorVersion", "_broadwayInit", "_broadwayExit", "_broadwayCreateStream", "_broadwayPlayStream", "_broadwayOnHeadersDecoded", "_broadwayOnPictureDecoded"]''',
   #'--closure', '1',
   '--js-library', 'library.js',
-  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/testFile.h264@testFile.h264',
-  '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/mozilla_story.mp4@mozilla_story.mp4',
+  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/mozilla_story.mp4@mozilla_story.mp4',
   # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/fox.264@fox.264',
-  # '--pre-js', 'file_dir.js',
-  # '--post-js', 'file_dir.js'
+  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/h264.h264@h264.h264',
+  '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/output.h264@output.h264',
+  # '--preload-file', '/Users/kord/Documents/source.nosync/Broadway-H.264-decoder/Decoder/decode.h264@decode.h264',
+  '--pre-js', 'download.js',
+  # '-s', 'USE_SDL=2',
+  # '-s', 'USE_WEBGL2=1',
+  # '-s', 'FULL_ES3=1',
+  # '-s', 'MODULARIZE=1'
 ]
 
 JS_DIR = "js"
@@ -90,7 +97,9 @@ source_files = [
   'H264SwDecApi.c',
   'extraFlags.c',
   'Decoder.c',
-  'main.c']
+  'main.c',
+  # 'Broadway.c'
+  ]
 
 
 for file in source_files:
@@ -110,6 +119,7 @@ subprocess.run(['emcc', '-r'] + object_files + ['-o', 'avc.bc'])
 
 print('emcc %s -> %s' % ('avc.bc', 'avc.js'))
 subprocess.run(['emcc', 'avc.bc', '-o', 'avc.js'] + emcc_args)
+subprocess.run(['emcc', 'avc.bc', '-o', 'index.html'] + emcc_args)
 
 print('copying %s -> %s' % ('avc.js', os.path.join('..','Player','avc-codec.js')))
 
