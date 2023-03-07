@@ -55,6 +55,8 @@ emcc_args = [
   # '-s', 'USE_WEBGL2=1',
   # '-s', 'FULL_ES3=1',
   # '-s', 'MODULARIZE=1'
+  '-s', 'USE_SDL=2',
+  '-s', 'USE_WEBGL2=1'
 ]
 
 JS_DIR = "js"
@@ -118,7 +120,7 @@ subprocess.run(['emcc', '-r'] + object_files + ['-o', 'avc.bc'])
 
 print('emcc %s -> %s' % ('avc.bc', 'avc.js'))
 subprocess.run(['emcc', 'avc.bc', '-o', 'avc.js'] + emcc_args)
-subprocess.run(['emcc', 'avc.bc', '-o', 'index.html'] + emcc_args)
+# subprocess.run(['emcc', 'avc.bc', '-o', 'index.html'] + emcc_args)
 
 print('copying %s -> %s' % ('avc.js', os.path.join('..','Player','avc-codec.js')))
 
