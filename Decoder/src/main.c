@@ -11,8 +11,8 @@
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *texture;
-int width = 640;
-int height = 480;
+int width = 1920;
+int height = 816;
 
 //! convert to baseline profile
 //* ffmpeg -i h264.h264 -profile:v baseline output.h264
@@ -311,7 +311,7 @@ int main(int argc, char *argv[]) {
     // packetize = 1;
     /* open input file for reading, file name given by user. If file open
      * fails -> exit */
-    finput = fopen("output.h264","rb");
+    finput = fopen("test2.h264","rb");
     if (finput == NULL)
     {
         DEBUG(("UNABLE TO OPEN INPUT FILE\n"));
