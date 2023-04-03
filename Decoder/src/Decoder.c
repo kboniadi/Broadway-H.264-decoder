@@ -334,8 +334,8 @@ u32 broadwayDecode(Decoder *dec) {
 }
 
 void broadwayExit(Decoder *dec) {
-	if (dec->streamBuffer) {
-		free(dec->streamBuffer);
+	if (dec->broadwayStream.buffer) {
+		free(dec->broadwayStream.buffer);
 	}
 }
 

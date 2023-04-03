@@ -15,6 +15,8 @@
 #include "extraFlags.h"
 
 #define STREAM_BUFFER_SIZE = 1024 * 1024;
+/* Debug prints */
+#define DEBUG(argv) printf argv
 
 typedef struct {
     u32 length;
