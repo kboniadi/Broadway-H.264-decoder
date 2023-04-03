@@ -21,6 +21,7 @@
         "__locale": "c",
         "__string": "c",
         "unistd.h": "c",
-        "sdl.h": "c"
+        "sdl.h": "c",
+        "ios": "c"
     }
 }

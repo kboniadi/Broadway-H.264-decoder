@@ -28,7 +28,7 @@ typedef struct {
     int nalUnitStream;
     int packetize;
     int cropDisplay;
-    int disableOutputReordering;
+    u32 disableOutputReordering;
 
     u8 *streamStop;
     u8 *tmpImage;
@@ -61,9 +61,11 @@ packetize: packet-by-packet mode
 cropDisplay: display cropped image (default decoded image)
 disableOutputReordering: disable DPB output reordering
 */
-u32 broadwayInit(Decoder *dec, int nalUnitStream, int packetize, int cropDisplay, int disableOutputReordering);
+u32 broadwayInit(Decoder *dec, int nalUnitStream, int packetize, int cropDisplay, u32 disableOutputReordering);
 u32 broadwayDecode(Decoder *dec);
 void playStream(Decoder *dec, Stream *stream);
 void broadwayExit(Decoder *dec);
 
+u32 broadwayGetMajorVersion();
+u32 broadwayGetMinorVersion();
 #endif // DECODER_H_
