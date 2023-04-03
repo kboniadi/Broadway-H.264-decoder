@@ -307,7 +307,7 @@ int main(int argc, char *argv[]) {
     //         disableOutputReordering = 1;
     //     }
     // }
-    nalUnitStream = 1;
+    // nalUnitStream = 1;
     // packetize = 1;
     /* open input file for reading, file name given by user. If file open
      * fails -> exit */

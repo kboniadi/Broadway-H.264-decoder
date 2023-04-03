@@ -24,6 +24,15 @@ typedef struct {
 } Stream;
 
 typedef struct {
+    /*options*/
+    int nalUnitStream;
+    int packetize;
+    int cropDisplay;
+    int disableOutputReordering;
+
+    u8 *streamStop;
+    u8 *tmpImage;
+
     u8 *streamBuffer;
 
     H264SwDecInst decInst;
@@ -46,7 +55,13 @@ extern void broadwayOnPictureDecoded(u8 *buffer, u32 width, u32 height);
 u8 *broadwayCreateStream(Decoder *dec, u32 length);
 void broadwayPlayStream(Decoder *dec, u32 length);
 
-u32 broadwayInit(Decoder *dec);
+/*
+nalUnitStream: NAL unit stream mode
+packetize: packet-by-packet mode
+cropDisplay: display cropped image (default decoded image)
+disableOutputReordering: disable DPB output reordering
+*/
+u32 broadwayInit(Decoder *dec, int nalUnitStream, int packetize, int cropDisplay, int disableOutputReordering);
 u32 broadwayDecode(Decoder *dec);
 void playStream(Decoder *dec, Stream *stream);
 void broadwayExit(Decoder *dec);
