@@ -4,3 +4,5 @@ obj/
 *.data
 *.mp4
 *.h264
+*.bc
+.vscode/
